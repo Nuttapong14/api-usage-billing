@@ -12,12 +12,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	"github.com/your-org/api-usage-billing/backend/internal/config"
-	subscriptionhandler "github.com/your-org/api-usage-billing/backend/internal/handler/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/logger"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
-	subscriptionsvc "github.com/your-org/api-usage-billing/backend/internal/service/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/config"
+	subscriptionhandler "github.com/Nuttapong14/api-usage-billing/internal/handler/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/logger"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
+	subscriptionsvc "github.com/Nuttapong14/api-usage-billing/internal/service/subscription"
 )
 
 func main() {

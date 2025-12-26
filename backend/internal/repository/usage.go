@@ -10,8 +10,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/domain/usage"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/usage"
 )
 
 var (
@@ -21,13 +21,13 @@ var (
 
 // UsageMetrics holds aggregated usage metrics.
 type UsageMetrics struct {
-	TotalRequests      int64
-	SuccessfulRequests int64
-	FailedRequests     int64
+	TotalRequests       int64
+	SuccessfulRequests  int64
+	FailedRequests      int64
 	TotalBandwidthBytes int64
-	AvgLatencyMs       *float64
-	P95LatencyMs       *float64
-	P99LatencyMs       *float64
+	AvgLatencyMs        *float64
+	P95LatencyMs        *float64
+	P99LatencyMs        *float64
 }
 
 // UsageDataPoint represents a usage summary for a period.
@@ -96,13 +96,13 @@ WHERE organization_id = ?
 	}
 
 	var row struct {
-		TotalRequests      int64
-		SuccessfulRequests int64
-		FailedRequests     int64
+		TotalRequests       int64
+		SuccessfulRequests  int64
+		FailedRequests      int64
 		TotalBandwidthBytes int64
-		AvgLatencyMs       sql.NullFloat64
-		P95LatencyMs       sql.NullFloat64
-		P99LatencyMs       sql.NullFloat64
+		AvgLatencyMs        sql.NullFloat64
+		P95LatencyMs        sql.NullFloat64
+		P99LatencyMs        sql.NullFloat64
 	}
 
 	if err := r.DB().WithContext(ctx).Raw(query, args...).Scan(&row).Error; err != nil {
@@ -110,13 +110,13 @@ WHERE organization_id = ?
 	}
 
 	return UsageMetrics{
-		TotalRequests:      row.TotalRequests,
-		SuccessfulRequests: row.SuccessfulRequests,
-		FailedRequests:     row.FailedRequests,
+		TotalRequests:       row.TotalRequests,
+		SuccessfulRequests:  row.SuccessfulRequests,
+		FailedRequests:      row.FailedRequests,
 		TotalBandwidthBytes: row.TotalBandwidthBytes,
-		AvgLatencyMs:       nullFloatToPtr(row.AvgLatencyMs),
-		P95LatencyMs:       nullFloatToPtr(row.P95LatencyMs),
-		P99LatencyMs:       nullFloatToPtr(row.P99LatencyMs),
+		AvgLatencyMs:        nullFloatToPtr(row.AvgLatencyMs),
+		P95LatencyMs:        nullFloatToPtr(row.P95LatencyMs),
+		P99LatencyMs:        nullFloatToPtr(row.P99LatencyMs),
 	}, nil
 }
 
@@ -150,14 +150,14 @@ func (r *usageRepository) GetUsageHistory(
 
 	var (
 		rows []struct {
-			Period            time.Time
-			TotalRequests     int64
-			SuccessfulRequests int64
-			FailedRequests    int64
+			Period              time.Time
+			TotalRequests       int64
+			SuccessfulRequests  int64
+			FailedRequests      int64
 			TotalBandwidthBytes int64
-			AvgLatencyMs      sql.NullFloat64
-			P95LatencyMs      sql.NullFloat64
-			P99LatencyMs      sql.NullFloat64
+			AvgLatencyMs        sql.NullFloat64
+			P95LatencyMs        sql.NullFloat64
+			P99LatencyMs        sql.NullFloat64
 		}
 		total int64
 	)
@@ -271,13 +271,13 @@ SELECT COUNT(*) FROM (
 		points = append(points, UsageDataPoint{
 			Period: row.Period,
 			Metrics: UsageMetrics{
-				TotalRequests:      row.TotalRequests,
-				SuccessfulRequests: row.SuccessfulRequests,
-				FailedRequests:     row.FailedRequests,
+				TotalRequests:       row.TotalRequests,
+				SuccessfulRequests:  row.SuccessfulRequests,
+				FailedRequests:      row.FailedRequests,
 				TotalBandwidthBytes: row.TotalBandwidthBytes,
-				AvgLatencyMs:       nullFloatToPtr(row.AvgLatencyMs),
-				P95LatencyMs:       nullFloatToPtr(row.P95LatencyMs),
-				P99LatencyMs:       nullFloatToPtr(row.P99LatencyMs),
+				AvgLatencyMs:        nullFloatToPtr(row.AvgLatencyMs),
+				P95LatencyMs:        nullFloatToPtr(row.P95LatencyMs),
+				P99LatencyMs:        nullFloatToPtr(row.P99LatencyMs),
 			},
 		})
 	}
@@ -330,14 +330,14 @@ GROUP BY group_key
 ORDER BY total_requests DESC`, groupExpr, baseQuery)
 
 	var rows []struct {
-		GroupKey           string
-		TotalRequests      int64
-		SuccessfulRequests int64
-		FailedRequests     int64
+		GroupKey            string
+		TotalRequests       int64
+		SuccessfulRequests  int64
+		FailedRequests      int64
 		TotalBandwidthBytes int64
-		AvgLatencyMs       sql.NullFloat64
-		P95LatencyMs       sql.NullFloat64
-		P99LatencyMs       sql.NullFloat64
+		AvgLatencyMs        sql.NullFloat64
+		P95LatencyMs        sql.NullFloat64
+		P99LatencyMs        sql.NullFloat64
 	}
 
 	if err := r.DB().WithContext(ctx).Raw(breakdownQuery, args...).Scan(&rows).Error; err != nil {
@@ -354,13 +354,13 @@ ORDER BY total_requests DESC`, groupExpr, baseQuery)
 		items = append(items, UsageBreakdownItem{
 			Key: row.GroupKey,
 			Metrics: UsageMetrics{
-				TotalRequests:      row.TotalRequests,
-				SuccessfulRequests: row.SuccessfulRequests,
-				FailedRequests:     row.FailedRequests,
+				TotalRequests:       row.TotalRequests,
+				SuccessfulRequests:  row.SuccessfulRequests,
+				FailedRequests:      row.FailedRequests,
 				TotalBandwidthBytes: row.TotalBandwidthBytes,
-				AvgLatencyMs:       nullFloatToPtr(row.AvgLatencyMs),
-				P95LatencyMs:       nullFloatToPtr(row.P95LatencyMs),
-				P99LatencyMs:       nullFloatToPtr(row.P99LatencyMs),
+				AvgLatencyMs:        nullFloatToPtr(row.AvgLatencyMs),
+				P95LatencyMs:        nullFloatToPtr(row.P95LatencyMs),
+				P99LatencyMs:        nullFloatToPtr(row.P99LatencyMs),
 			},
 		})
 	}

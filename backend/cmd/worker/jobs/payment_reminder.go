@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/domain/billing"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/billing"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 // PaymentReminder represents an overdue invoice reminder.

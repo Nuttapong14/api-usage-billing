@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	apikeysvc "github.com/your-org/api-usage-billing/backend/internal/service/apikey"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	apikeysvc "github.com/Nuttapong14/api-usage-billing/internal/service/apikey"
 )
 
 type revokeAPIKeyRequest struct {

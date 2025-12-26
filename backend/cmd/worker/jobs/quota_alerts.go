@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	notificationsvc "github.com/your-org/api-usage-billing/backend/internal/service/notification"
-	subscriptionsvc "github.com/your-org/api-usage-billing/backend/internal/service/subscription"
+	notificationsvc "github.com/Nuttapong14/api-usage-billing/internal/service/notification"
+	subscriptionsvc "github.com/Nuttapong14/api-usage-billing/internal/service/subscription"
 )
 
 // QuotaAlertJobParams defines inputs for quota alerts.
@@ -30,10 +30,10 @@ func RunQuotaAlerts(ctx context.Context, svc notificationsvc.Service, params Quo
 	for _, alert := range params.Alerts {
 		eventType := quotaEventType(alert)
 		payload := map[string]any{
-			"resource":    alert.Resource,
-			"percentage":  alert.Percentage,
-			"threshold":   alert.Threshold,
-			"level":       string(alert.Level),
+			"resource":     alert.Resource,
+			"percentage":   alert.Percentage,
+			"threshold":    alert.Threshold,
+			"level":        string(alert.Level),
 			"period_start": params.PeriodStart.Format(time.RFC3339),
 			"period_end":   params.PeriodEnd.Format(time.RFC3339),
 		}

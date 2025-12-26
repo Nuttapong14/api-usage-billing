@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	usageSvc "github.com/your-org/api-usage-billing/backend/internal/service/usage"
+	usageSvc "github.com/Nuttapong14/api-usage-billing/internal/service/usage"
 )
 
 // GetUsageBreakdown handles GET /usage/breakdown.

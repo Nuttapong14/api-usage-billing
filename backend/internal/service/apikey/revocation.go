@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/infrastructure/redis"
+	"github.com/Nuttapong14/api-usage-billing/internal/infrastructure/redis"
 )
 
 const RevocationChannel = "apikey:revoked"

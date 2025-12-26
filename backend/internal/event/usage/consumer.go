@@ -6,7 +6,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	infraevents "github.com/your-org/api-usage-billing/backend/internal/infrastructure/events"
+	infraevents "github.com/Nuttapong14/api-usage-billing/internal/infrastructure/events"
 )
 
 // Handler processes a usage event.
@@ -14,32 +14,32 @@ type Handler func(ctx context.Context, event *Event) error
 
 // ConsumerConfig configures the usage event consumer.
 type ConsumerConfig struct {
-	StreamPrefix   string
-	Stream         string
-	ConsumerGroup  string
-	ConsumerName   string
-	BatchSize      int64
-	BlockTimeout   time.Duration
-	RetryDelay     time.Duration
-	MaxRetries     int
-	ClaimMinIdle   time.Duration
-	ClaimBatchSize int64
+	StreamPrefix    string
+	Stream          string
+	ConsumerGroup   string
+	ConsumerName    string
+	BatchSize       int64
+	BlockTimeout    time.Duration
+	RetryDelay      time.Duration
+	MaxRetries      int
+	ClaimMinIdle    time.Duration
+	ClaimBatchSize  int64
 	CleanupInterval time.Duration
 }
 
 // DefaultConsumerConfig returns default consumer settings.
 func DefaultConsumerConfig() ConsumerConfig {
 	return ConsumerConfig{
-		StreamPrefix:   "usage",
-		Stream:         "requests",
-		ConsumerGroup:  "usage-tracker",
-		ConsumerName:   "usage-consumer",
-		BatchSize:      50,
-		BlockTimeout:   5 * time.Second,
-		RetryDelay:     1 * time.Second,
-		MaxRetries:     3,
-		ClaimMinIdle:   30 * time.Second,
-		ClaimBatchSize: 50,
+		StreamPrefix:    "usage",
+		Stream:          "requests",
+		ConsumerGroup:   "usage-tracker",
+		ConsumerName:    "usage-consumer",
+		BatchSize:       50,
+		BlockTimeout:    5 * time.Second,
+		RetryDelay:      1 * time.Second,
+		MaxRetries:      3,
+		ClaimMinIdle:    30 * time.Second,
+		ClaimBatchSize:  50,
 		CleanupInterval: 1 * time.Minute,
 	}
 }

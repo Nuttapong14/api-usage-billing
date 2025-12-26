@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	billingsvc "github.com/your-org/api-usage-billing/backend/internal/service/billing"
+	billingsvc "github.com/Nuttapong14/api-usage-billing/internal/service/billing"
 )
 
 // GetInvoicePDF handles GET /invoices/{id}/pdf.

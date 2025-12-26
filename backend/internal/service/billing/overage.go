@@ -5,9 +5,9 @@ import (
 
 	"github.com/shopspring/decimal"
 
-	subscriptionmodel "github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/quota"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	subscriptionmodel "github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/quota"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 // CalculateOverage creates line items for overage usage.

@@ -3,7 +3,7 @@ package analytics
 import (
 	"github.com/gofiber/fiber/v2"
 
-	analyticsvc "github.com/your-org/api-usage-billing/backend/internal/service/analytics"
+	analyticsvc "github.com/Nuttapong14/api-usage-billing/internal/service/analytics"
 )
 
 // GetOverview handles GET /analytics/overview.

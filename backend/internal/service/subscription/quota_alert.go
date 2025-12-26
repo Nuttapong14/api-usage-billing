@@ -3,7 +3,7 @@ package subscription
 import (
 	"sort"
 
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/quota"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/quota"
 )
 
 // QuotaAlertLevel indicates alert severity.

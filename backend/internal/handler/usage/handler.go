@@ -7,9 +7,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/auth"
-	usageSvc "github.com/your-org/api-usage-billing/backend/internal/service/usage"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/auth"
+	usageSvc "github.com/Nuttapong14/api-usage-billing/internal/service/usage"
 )
 
 var (

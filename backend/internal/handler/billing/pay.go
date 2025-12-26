@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	billingsvc "github.com/your-org/api-usage-billing/backend/internal/service/billing"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	billingsvc "github.com/Nuttapong14/api-usage-billing/internal/service/billing"
 )
 
 // PayInvoice handles POST /invoices/{id}/pay.

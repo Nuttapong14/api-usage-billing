@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	usageevent "github.com/your-org/api-usage-billing/backend/internal/event/usage"
+	usageevent "github.com/Nuttapong14/api-usage-billing/internal/event/usage"
 )
 
 // Config defines plugin configuration for usage logging.

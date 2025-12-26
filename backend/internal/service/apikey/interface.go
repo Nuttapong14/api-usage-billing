@@ -7,27 +7,27 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/middleware"
+	"github.com/Nuttapong14/api-usage-billing/internal/middleware"
 )
 
 var (
-	ErrAPIKeyAlreadyRevoked    = errors.New("api key already revoked")
+	ErrAPIKeyAlreadyRevoked     = errors.New("api key already revoked")
 	ErrAPIKeyRotationInProgress = errors.New("api key rotation already in progress")
-	ErrAPIKeyLimitReached      = errors.New("api key limit reached")
-	ErrInvalidGracePeriod      = errors.New("invalid grace period")
-	ErrInvalidPermissions      = errors.New("invalid permissions")
+	ErrAPIKeyLimitReached       = errors.New("api key limit reached")
+	ErrInvalidGracePeriod       = errors.New("invalid grace period")
+	ErrInvalidPermissions       = errors.New("invalid permissions")
 )
 
 // APIKey represents an API key response.
 type APIKey struct {
-	ID                 uuid.UUID `json:"id"`
-	KeyPrefix          string    `json:"key_prefix"`
-	Name               string    `json:"name"`
-	Description        *string   `json:"description,omitempty"`
-	Permissions        []string  `json:"permissions"`
-	Scopes             []string  `json:"scopes,omitempty"`
-	IPWhitelist        []string  `json:"ip_whitelist,omitempty"`
-	AllowedOrigins     []string  `json:"allowed_origins,omitempty"`
+	ID                 uuid.UUID  `json:"id"`
+	KeyPrefix          string     `json:"key_prefix"`
+	Name               string     `json:"name"`
+	Description        *string    `json:"description,omitempty"`
+	Permissions        []string   `json:"permissions"`
+	Scopes             []string   `json:"scopes,omitempty"`
+	IPWhitelist        []string   `json:"ip_whitelist,omitempty"`
+	AllowedOrigins     []string   `json:"allowed_origins,omitempty"`
 	ExpiresAt          *time.Time `json:"expires_at,omitempty"`
 	LastUsedAt         *time.Time `json:"last_used_at,omitempty"`
 	LastUsedIP         *string    `json:"last_used_ip,omitempty"`
@@ -83,16 +83,16 @@ type CreateAPIKeyResponse struct {
 
 // RotateAPIKeyParams contains inputs for rotation.
 type RotateAPIKeyParams struct {
-	OrganizationID    uuid.UUID
-	CustomerID        uuid.UUID
-	APIKeyID          uuid.UUID
-	GracePeriodHours  int
+	OrganizationID   uuid.UUID
+	CustomerID       uuid.UUID
+	APIKeyID         uuid.UUID
+	GracePeriodHours int
 }
 
 // RotateAPIKeyResponse represents rotation output.
 type RotateAPIKeyResponse struct {
-	NewKey          string  `json:"new_key"`
-	NewAPIKey       APIKey  `json:"new_api_key"`
+	NewKey          string    `json:"new_key"`
+	NewAPIKey       APIKey    `json:"new_api_key"`
 	OldKeyID        uuid.UUID `json:"old_key_id"`
 	OldKeyExpiresAt time.Time `json:"old_key_expires_at"`
 	Message         string    `json:"message,omitempty"`

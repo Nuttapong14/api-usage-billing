@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 
-	billinghandler "github.com/your-org/api-usage-billing/backend/internal/handler/billing"
+	billinghandler "github.com/Nuttapong14/api-usage-billing/internal/handler/billing"
 )
 
 // RegisterRoutes wires HTTP routes for the billing service.

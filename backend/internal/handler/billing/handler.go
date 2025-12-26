@@ -7,10 +7,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/auth"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
-	billingsvc "github.com/your-org/api-usage-billing/backend/internal/service/billing"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/auth"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
+	billingsvc "github.com/Nuttapong14/api-usage-billing/internal/service/billing"
 )
 
 var (

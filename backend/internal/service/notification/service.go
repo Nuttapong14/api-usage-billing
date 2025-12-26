@@ -12,9 +12,9 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 
-	"github.com/your-org/api-usage-billing/backend/internal/domain/webhook"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/email"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/webhook"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/email"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 const (
@@ -23,17 +23,17 @@ const (
 )
 
 var validEvents = map[string]struct{}{
-	string(EventTestWebhook):           {},
-	string(EventUsageQuotaWarning):     {},
-	string(EventUsageQuotaExceeded):    {},
-	string(EventInvoiceCreated):        {},
-	string(EventInvoicePaid):           {},
-	string(EventPaymentReceived):       {},
-	string(EventSubscriptionUpgraded):  {},
+	string(EventTestWebhook):            {},
+	string(EventUsageQuotaWarning):      {},
+	string(EventUsageQuotaExceeded):     {},
+	string(EventInvoiceCreated):         {},
+	string(EventInvoicePaid):            {},
+	string(EventPaymentReceived):        {},
+	string(EventSubscriptionUpgraded):   {},
 	string(EventSubscriptionDowngraded): {},
-	string(EventSubscriptionCancelled): {},
-	string(EventAPIKeyCreated):         {},
-	string(EventAPIKeyRevoked):         {},
+	string(EventSubscriptionCancelled):  {},
+	string(EventAPIKeyCreated):          {},
+	string(EventAPIKeyRevoked):          {},
 }
 
 // ServiceImpl implements notification operations.

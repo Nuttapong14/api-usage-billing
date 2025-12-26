@@ -7,26 +7,26 @@ import (
 
 	"github.com/google/uuid"
 
-	infraevents "github.com/your-org/api-usage-billing/backend/internal/infrastructure/events"
+	infraevents "github.com/Nuttapong14/api-usage-billing/internal/infrastructure/events"
 )
 
 // Event represents a usage event emitted by the API gateway.
 type Event struct {
-	ID               string                 `json:"id"`
-	OrganizationID   uuid.UUID              `json:"organization_id"`
-	CustomerID       uuid.UUID              `json:"customer_id"`
-	APIKeyID         *uuid.UUID             `json:"api_key_id,omitempty"`
-	RequestID        string                 `json:"request_id"`
-	Endpoint         string                 `json:"endpoint"`
-	Method           string                 `json:"method"`
-	StatusCode       int                    `json:"status_code"`
-	RequestSizeBytes int                    `json:"request_size_bytes"`
-	ResponseSizeBytes int                   `json:"response_size_bytes"`
-	LatencyMs        int                    `json:"latency_ms"`
-	RecordedAt       time.Time              `json:"recorded_at"`
-	UserAgent        string                 `json:"user_agent,omitempty"`
-	ClientIP         string                 `json:"client_ip,omitempty"`
-	Metadata         map[string]interface{} `json:"metadata,omitempty"`
+	ID                string                 `json:"id"`
+	OrganizationID    uuid.UUID              `json:"organization_id"`
+	CustomerID        uuid.UUID              `json:"customer_id"`
+	APIKeyID          *uuid.UUID             `json:"api_key_id,omitempty"`
+	RequestID         string                 `json:"request_id"`
+	Endpoint          string                 `json:"endpoint"`
+	Method            string                 `json:"method"`
+	StatusCode        int                    `json:"status_code"`
+	RequestSizeBytes  int                    `json:"request_size_bytes"`
+	ResponseSizeBytes int                    `json:"response_size_bytes"`
+	LatencyMs         int                    `json:"latency_ms"`
+	RecordedAt        time.Time              `json:"recorded_at"`
+	UserAgent         string                 `json:"user_agent,omitempty"`
+	ClientIP          string                 `json:"client_ip,omitempty"`
+	Metadata          map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // NewEvent creates a new usage event with defaults.

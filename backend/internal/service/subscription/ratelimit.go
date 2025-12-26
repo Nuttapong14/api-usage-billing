@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	subscriptionmodel "github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	subscriptionmodel "github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 // RateLimit defines a rate limit policy.

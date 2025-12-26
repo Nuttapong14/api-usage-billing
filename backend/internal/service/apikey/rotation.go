@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	apikeydomain "github.com/your-org/api-usage-billing/backend/internal/domain/apikey"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/hash"
+	apikeydomain "github.com/Nuttapong14/api-usage-billing/internal/domain/apikey"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/hash"
 )
 
 // RotateAPIKey creates a new key and schedules the old one for expiration.

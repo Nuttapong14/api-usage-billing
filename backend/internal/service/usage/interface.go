@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	usageevent "github.com/your-org/api-usage-billing/backend/internal/event/usage"
+	usageevent "github.com/Nuttapong14/api-usage-billing/internal/event/usage"
 )
 
 // UsageMetrics represents usage statistics.
@@ -22,9 +22,9 @@ type UsageMetrics struct {
 
 // QuotaItem represents quota usage for a resource.
 type QuotaItem struct {
-	Limit         *int64  `json:"limit"`
-	Used          int64   `json:"used"`
-	Remaining     *int64  `json:"remaining"`
+	Limit          *int64  `json:"limit"`
+	Used           int64   `json:"used"`
+	Remaining      *int64  `json:"remaining"`
 	PercentageUsed float64 `json:"percentage_used"`
 }
 
@@ -42,11 +42,11 @@ type BillingPeriod struct {
 
 // CurrentUsage is the response for current usage.
 type CurrentUsage struct {
-	CustomerID   uuid.UUID   `json:"customer_id"`
+	CustomerID    uuid.UUID     `json:"customer_id"`
 	BillingPeriod BillingPeriod `json:"billing_period"`
-	Usage        UsageMetrics `json:"usage"`
-	Quota        QuotaStatus  `json:"quota"`
-	LastUpdated  time.Time    `json:"last_updated"`
+	Usage         UsageMetrics  `json:"usage"`
+	Quota         QuotaStatus   `json:"quota"`
+	LastUpdated   time.Time     `json:"last_updated"`
 }
 
 // UsageDataPoint represents usage metrics for a period.
@@ -79,7 +79,7 @@ type UsageBreakdownItem struct {
 
 // UsageBreakdown is the response for usage breakdown.
 type UsageBreakdown struct {
-	Total     UsageMetrics        `json:"total"`
+	Total     UsageMetrics         `json:"total"`
 	Breakdown []UsageBreakdownItem `json:"breakdown"`
 }
 

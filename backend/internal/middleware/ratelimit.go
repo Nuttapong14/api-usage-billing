@@ -10,9 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/auth"
-	subscriptionsvc "github.com/your-org/api-usage-billing/backend/internal/service/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/auth"
+	subscriptionsvc "github.com/Nuttapong14/api-usage-billing/internal/service/subscription"
 )
 
 // RateLimitConfig configures the rate limit middleware.

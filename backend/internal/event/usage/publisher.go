@@ -6,7 +6,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	infraevents "github.com/your-org/api-usage-billing/backend/internal/infrastructure/events"
+	infraevents "github.com/Nuttapong14/api-usage-billing/internal/infrastructure/events"
 )
 
 // PublisherConfig configures usage event publishing.
@@ -61,7 +61,7 @@ func (p *Publisher) Publish(ctx context.Context, event *Event) (string, error) {
 		"request_size_bytes":  event.RequestSizeBytes,
 		"response_size_bytes": event.ResponseSizeBytes,
 		"latency_ms":          event.LatencyMs,
-		"recorded_at":          event.RecordedAt.Format(time.RFC3339Nano),
+		"recorded_at":         event.RecordedAt.Format(time.RFC3339Nano),
 		"user_agent":          event.UserAgent,
 		"client_ip":           event.ClientIP,
 		"metadata":            event.Metadata,

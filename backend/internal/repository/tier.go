@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
 )
 
 // TierRepository handles subscription tier data access.
