@@ -12,14 +12,14 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	"github.com/your-org/api-usage-billing/backend/internal/config"
-	billinghandler "github.com/your-org/api-usage-billing/backend/internal/handler/billing"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/logger"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/pdf"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/storage"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
-	billingsvc "github.com/your-org/api-usage-billing/backend/internal/service/billing"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/config"
+	billinghandler "github.com/Nuttapong14/api-usage-billing/internal/handler/billing"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/logger"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/pdf"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/storage"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
+	billingsvc "github.com/Nuttapong14/api-usage-billing/internal/service/billing"
 )
 
 func main() {

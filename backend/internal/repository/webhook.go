@@ -8,11 +8,11 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/your-org/api-usage-billing/backend/internal/domain/webhook"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/webhook"
 )
 
 var (
-	ErrWebhookNotFound        = errors.New("webhook endpoint not found")
+	ErrWebhookNotFound         = errors.New("webhook endpoint not found")
 	ErrWebhookDeliveryNotFound = errors.New("webhook delivery not found")
 )
 

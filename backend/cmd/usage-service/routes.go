@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 
-	apikeyhandler "github.com/your-org/api-usage-billing/backend/internal/handler/apikey"
-	usagehandler "github.com/your-org/api-usage-billing/backend/internal/handler/usage"
+	apikeyhandler "github.com/Nuttapong14/api-usage-billing/internal/handler/apikey"
+	usagehandler "github.com/Nuttapong14/api-usage-billing/internal/handler/usage"
 )
 
 // RegisterRoutes wires HTTP routes for the usage service.

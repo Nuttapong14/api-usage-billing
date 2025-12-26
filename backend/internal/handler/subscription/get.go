@@ -3,7 +3,7 @@ package subscription
 import (
 	"github.com/gofiber/fiber/v2"
 
-	subscriptionsvc "github.com/your-org/api-usage-billing/backend/internal/service/subscription"
+	subscriptionsvc "github.com/Nuttapong14/api-usage-billing/internal/service/subscription"
 )
 
 // GetCurrentSubscription handles GET /subscription.

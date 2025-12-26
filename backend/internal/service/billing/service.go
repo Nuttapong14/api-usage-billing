@@ -11,11 +11,11 @@ import (
 	"github.com/shopspring/decimal"
 	"gorm.io/datatypes"
 
-	billingdomain "github.com/your-org/api-usage-billing/backend/internal/domain/billing"
-	subscriptionmodel "github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/pdf"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/storage"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	billingdomain "github.com/Nuttapong14/api-usage-billing/internal/domain/billing"
+	subscriptionmodel "github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/pdf"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/storage"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 // ServiceImpl implements billing operations.
@@ -163,15 +163,15 @@ func (s *ServiceImpl) PayInvoice(ctx context.Context, params PayInvoiceParams) (
 
 	method := params.Request.PaymentMethod
 	payment := &billingdomain.Payment{
-		InvoiceID:      invoice.ID,
-		OrganizationID: invoice.OrganizationID,
-		Amount:         invoice.Total,
-		Currency:       invoice.Currency,
-		PaymentMethod:  &method,
-		Status:         billingdomain.PaymentStatusPending,
+		InvoiceID:       invoice.ID,
+		OrganizationID:  invoice.OrganizationID,
+		Amount:          invoice.Total,
+		Currency:        invoice.Currency,
+		PaymentMethod:   &method,
+		Status:          billingdomain.PaymentStatusPending,
 		GatewayResponse: datatypes.JSON([]byte("{}")),
-		CreatedAt:      s.clock().UTC(),
-		UpdatedAt:      s.clock().UTC(),
+		CreatedAt:       s.clock().UTC(),
+		UpdatedAt:       s.clock().UTC(),
 	}
 
 	if err := s.payments.Create(ctx, payment); err != nil {
@@ -208,15 +208,15 @@ func (s *ServiceImpl) GenerateInvoice(ctx context.Context, params GenerateInvoic
 
 	billingCycle := string(sub.BillingCycle)
 	price := tierPriceForCycle(tier, billingCycle)
-		lineItems := []LineItem{
-			{
-				Type:        "subscription",
-				Description: fmt.Sprintf("%s Plan - %s", tier.Name, formatBillingCycle(billingCycle)),
-				Quantity:    1,
-				UnitPrice:   moneyFromDecimal(price, tier.Currency),
-				Amount:      moneyFromDecimal(price, tier.Currency),
-			},
-		}
+	lineItems := []LineItem{
+		{
+			Type:        "subscription",
+			Description: fmt.Sprintf("%s Plan - %s", tier.Name, formatBillingCycle(billingCycle)),
+			Quantity:    1,
+			UnitPrice:   moneyFromDecimal(price, tier.Currency),
+			Amount:      moneyFromDecimal(price, tier.Currency),
+		},
+	}
 
 	metrics, err := s.usage.GetUsageSummary(ctx, tier.OrganizationID, params.CustomerID, nil, params.PeriodStart, params.PeriodEnd.AddDate(0, 0, 1))
 	if err != nil {
@@ -430,14 +430,14 @@ func toPDFInvoice(invoice Invoice) pdf.Invoice {
 	}
 
 	return pdf.Invoice{
-		InvoiceNumber:     invoice.InvoiceNumber,
-		CustomerID:        invoice.CustomerID.String(),
+		InvoiceNumber:      invoice.InvoiceNumber,
+		CustomerID:         invoice.CustomerID.String(),
 		BillingPeriodStart: invoice.BillingPeriod.Start.Format("2006-01-02"),
 		BillingPeriodEnd:   invoice.BillingPeriod.End.Format("2006-01-02"),
-		Status:            invoice.Status,
-		IssueDate:         invoice.Dates.IssueDate.Format("2006-01-02"),
-		DueDate:           invoice.Dates.DueDate.Format("2006-01-02"),
-		PaidAt:            formatOptionalTime(invoice.Dates.PaidAt),
+		Status:             invoice.Status,
+		IssueDate:          invoice.Dates.IssueDate.Format("2006-01-02"),
+		DueDate:            invoice.Dates.DueDate.Format("2006-01-02"),
+		PaidAt:             formatOptionalTime(invoice.Dates.PaidAt),
 		Amounts: pdf.InvoiceAmounts{
 			Subtotal:  pdf.Money{Amount: invoice.Amounts.Subtotal.Amount, Currency: invoice.Amounts.Subtotal.Currency},
 			Discount:  pdf.Money{Amount: invoice.Amounts.Discount.Amount, Currency: invoice.Amounts.Discount.Currency},

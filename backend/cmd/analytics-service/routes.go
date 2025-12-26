@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 
-	analyticshandler "github.com/your-org/api-usage-billing/backend/internal/handler/analytics"
+	analyticshandler "github.com/Nuttapong14/api-usage-billing/internal/handler/analytics"
 )
 
 // RegisterRoutes wires HTTP routes for the analytics service.

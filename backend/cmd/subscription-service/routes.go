@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 
-	subscriptionhandler "github.com/your-org/api-usage-billing/backend/internal/handler/subscription"
+	subscriptionhandler "github.com/Nuttapong14/api-usage-billing/internal/handler/subscription"
 )
 
 // RegisterRoutes wires HTTP routes for the subscription service.

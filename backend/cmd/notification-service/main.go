@@ -12,13 +12,13 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	"github.com/your-org/api-usage-billing/backend/internal/config"
-	webhookhandler "github.com/your-org/api-usage-billing/backend/internal/handler/webhook"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/email"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/logger"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
-	notificationsvc "github.com/your-org/api-usage-billing/backend/internal/service/notification"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/config"
+	webhookhandler "github.com/Nuttapong14/api-usage-billing/internal/handler/webhook"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/email"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/logger"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
+	notificationsvc "github.com/Nuttapong14/api-usage-billing/internal/service/notification"
 )
 
 func main() {

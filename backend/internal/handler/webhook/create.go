@@ -3,8 +3,8 @@ package webhook
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	notificationsvc "github.com/your-org/api-usage-billing/backend/internal/service/notification"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	notificationsvc "github.com/Nuttapong14/api-usage-billing/internal/service/notification"
 )
 
 type createWebhookRequest struct {

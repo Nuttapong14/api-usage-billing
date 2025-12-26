@@ -6,20 +6,20 @@ import (
 
 	"github.com/google/uuid"
 
-	subscriptionmodel "github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	subscriptionmodel "github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 // TierServiceImpl implements tier operations.
 type TierServiceImpl struct {
-	tiers          repository.TierRepository
+	tiers         repository.TierRepository
 	subscriptions repository.SubscriptionRepository
 }
 
 // NewTierService creates a new tier service.
 func NewTierService(tiers repository.TierRepository, subscriptions repository.SubscriptionRepository) *TierServiceImpl {
 	return &TierServiceImpl{
-		tiers:          tiers,
+		tiers:         tiers,
 		subscriptions: subscriptions,
 	}
 }

@@ -1,4 +1,4 @@
-module github.com/your-org/api-usage-billing/backend
+module github.com/Nuttapong14/api-usage-billing
 
 go 1.24.0
 

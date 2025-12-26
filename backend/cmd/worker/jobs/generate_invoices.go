@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	billingsvc "github.com/your-org/api-usage-billing/backend/internal/service/billing"
+	billingsvc "github.com/Nuttapong14/api-usage-billing/internal/service/billing"
 )
 
 // GenerateInvoicesParams defines inputs for invoice generation.

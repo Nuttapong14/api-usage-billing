@@ -9,11 +9,11 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 
-	apikeydomain "github.com/your-org/api-usage-billing/backend/internal/domain/apikey"
-	"github.com/your-org/api-usage-billing/backend/internal/infrastructure/redis"
-	"github.com/your-org/api-usage-billing/backend/internal/middleware"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/hash"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	apikeydomain "github.com/Nuttapong14/api-usage-billing/internal/domain/apikey"
+	"github.com/Nuttapong14/api-usage-billing/internal/infrastructure/redis"
+	"github.com/Nuttapong14/api-usage-billing/internal/middleware"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/hash"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 const (
@@ -38,14 +38,14 @@ func DefaultConfig() Config {
 
 // ServiceImpl implements API key operations.
 type ServiceImpl struct {
-	repo         repository.APIKeyRepository
-	customers    repository.CustomerRepository
-	cache        *Cache
-	pubsub       *redis.PubSub
-	keyPrefix    string
-	maxKeys      int
-	gracePeriod  time.Duration
-	clock        func() time.Time
+	repo        repository.APIKeyRepository
+	customers   repository.CustomerRepository
+	cache       *Cache
+	pubsub      *redis.PubSub
+	keyPrefix   string
+	maxKeys     int
+	gracePeriod time.Duration
+	clock       func() time.Time
 }
 
 // NewService creates a new API key service.

@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
-	subscriptionsvc "github.com/your-org/api-usage-billing/backend/internal/service/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
+	subscriptionsvc "github.com/Nuttapong14/api-usage-billing/internal/service/subscription"
 )
 
 type upgradeRequest struct {

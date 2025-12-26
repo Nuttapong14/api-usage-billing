@@ -10,10 +10,10 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 
-	usageevent "github.com/your-org/api-usage-billing/backend/internal/event/usage"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
-	"github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/domain/usage"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/domain/usage"
+	usageevent "github.com/Nuttapong14/api-usage-billing/internal/event/usage"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 var (

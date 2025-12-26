@@ -15,7 +15,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/google/uuid"
 
-	healthhandler "github.com/your-org/api-usage-billing/backend/internal/handler"
+	healthhandler "github.com/Nuttapong14/api-usage-billing/internal/handler"
 )
 
 // ServerConfig holds server configuration
@@ -29,12 +29,12 @@ type ServerConfig struct {
 	ShutdownTimeout time.Duration
 
 	// App settings
-	AppName        string
-	Environment    string
-	EnablePrefork  bool
-	BodyLimit      int
-	CaseSensitive  bool
-	StrictRouting  bool
+	AppName       string
+	Environment   string
+	EnablePrefork bool
+	BodyLimit     int
+	CaseSensitive bool
+	StrictRouting bool
 
 	// Security settings
 	EnableCORS        bool
@@ -55,8 +55,8 @@ type ServerConfig struct {
 	CompressionLevel  int
 
 	// Recovery settings
-	EnableRecovery      bool
-	EnableStackTrace    bool
+	EnableRecovery   bool
+	EnableStackTrace bool
 }
 
 // DefaultServerConfig returns default server configuration
@@ -171,7 +171,7 @@ func (s *Server) applyMiddleware() {
 			AllowOrigins:     s.config.CORSAllowOrigins,
 			AllowMethods:     s.config.CORSAllowMethods,
 			AllowHeaders:     s.config.CORSAllowHeaders,
-		AllowCredentials: false,
+			AllowCredentials: false,
 			ExposeHeaders:    "X-Request-ID,X-RateLimit-Limit,X-RateLimit-Remaining,X-RateLimit-Reset",
 			MaxAge:           86400, // 24 hours
 		}))

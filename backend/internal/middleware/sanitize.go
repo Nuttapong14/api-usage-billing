@@ -7,24 +7,24 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/your-org/api-usage-billing/backend/internal/api"
+	"github.com/Nuttapong14/api-usage-billing/internal/api"
 )
 
 // SanitizeConfig configures request sanitization checks.
 type SanitizeConfig struct {
-	RejectNullBytes  bool
+	RejectNullBytes   bool
 	RejectInvalidUTF8 bool
-	MaxQueryBytes    int
-	MaxBodyBytes     int
+	MaxQueryBytes     int
+	MaxBodyBytes      int
 }
 
 // DefaultSanitizeConfig returns baseline sanitization settings.
 func DefaultSanitizeConfig() SanitizeConfig {
 	return SanitizeConfig{
-		RejectNullBytes:  true,
+		RejectNullBytes:   true,
 		RejectInvalidUTF8: true,
-		MaxQueryBytes:    4096,
-		MaxBodyBytes:     0,
+		MaxQueryBytes:     4096,
+		MaxBodyBytes:      0,
 	}
 }
 

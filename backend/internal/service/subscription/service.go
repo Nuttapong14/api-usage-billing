@@ -10,9 +10,9 @@ import (
 	"github.com/shopspring/decimal"
 	"gorm.io/datatypes"
 
-	subscriptionmodel "github.com/your-org/api-usage-billing/backend/internal/domain/subscription"
-	"github.com/your-org/api-usage-billing/backend/internal/pkg/quota"
-	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	subscriptionmodel "github.com/Nuttapong14/api-usage-billing/internal/domain/subscription"
+	"github.com/Nuttapong14/api-usage-billing/internal/pkg/quota"
+	"github.com/Nuttapong14/api-usage-billing/internal/repository"
 )
 
 // ServiceImpl implements subscription operations.
@@ -125,10 +125,10 @@ func (s *ServiceImpl) UpgradeSubscription(ctx context.Context, params ChangeSubs
 	}
 
 	return &SubscriptionChangeResponse{
-		Subscription: *updatedSub,
-		ChangeType:   "immediate",
+		Subscription:  *updatedSub,
+		ChangeType:    "immediate",
 		EffectiveDate: s.clock().UTC(),
-		Message:      "Subscription upgraded",
+		Message:       "Subscription upgraded",
 	}, nil
 }
 
@@ -197,10 +197,10 @@ func (s *ServiceImpl) DowngradeSubscription(ctx context.Context, params ChangeSu
 	}
 
 	return &SubscriptionChangeResponse{
-		Subscription: *updatedSub,
-		ChangeType:   "scheduled",
+		Subscription:  *updatedSub,
+		ChangeType:    "scheduled",
 		EffectiveDate: effectiveDate,
-		Message:      "Downgrade scheduled",
+		Message:       "Downgrade scheduled",
 	}, nil
 }
 
@@ -411,16 +411,16 @@ func toTier(tier *subscriptionmodel.SubscriptionTier, isCurrent bool) Tier {
 	}
 
 	return Tier{
-		ID:           tier.ID,
-		Name:         tier.Name,
-		Slug:         tier.Slug,
-		Description:  tier.Description,
-		Pricing:      pricing,
-		Quotas:       TierQuotas{Requests: tier.QuotaRequests, BandwidthMB: tier.QuotaBandwidthMB, ComputeSeconds: tier.QuotaComputeSeconds},
-		RateLimits:   TierRateLimits{PerSecond: tier.RateLimitPerSecond, PerMinute: tier.RateLimitPerMinute, Burst: tier.RateLimitBurst},
-		Features:     features,
+		ID:            tier.ID,
+		Name:          tier.Name,
+		Slug:          tier.Slug,
+		Description:   tier.Description,
+		Pricing:       pricing,
+		Quotas:        TierQuotas{Requests: tier.QuotaRequests, BandwidthMB: tier.QuotaBandwidthMB, ComputeSeconds: tier.QuotaComputeSeconds},
+		RateLimits:    TierRateLimits{PerSecond: tier.RateLimitPerSecond, PerMinute: tier.RateLimitPerMinute, Burst: tier.RateLimitBurst},
+		Features:      features,
 		SLAPercentage: sla,
-		IsCurrent:    isCurrent,
+		IsCurrent:     isCurrent,
 	}
 }
 
