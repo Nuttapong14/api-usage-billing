@@ -1,0 +1,75 @@
+# Go
+bin/
+vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Go test binaries (but not .env.test which is unignored below)
+*.test
+!.env.test
+*.out
+*.prof
+*.pprof
+coverage.out
+
+# Node/TypeScript
+node_modules/
+~/.bun/
+*/~/.bun/
+**/~/.bun/
+*.node
+dist/
+build/
+.next/
+.turbo/
+.cache/
+*.log
+*.log.*
+*.tsbuildinfo
+
+# Package manager locks (optional - remove line if you want to track)
+# bun.lock
+# pnpm-lock.yaml
+# package-lock.json
+
+# Go backend
+backend/tmp/
+# =============================================================================
+# Environment files (credentials) - NEVER commit files with real secrets
+# =============================================================================
+# Local environment file (contains your actual credentials)
+.env
+
+# Environment-specific local overrides
+.env.local
+.env.*.local
+
+# Production/staging secrets (NEVER commit these)
+.env.production
+.env.staging
+
+# =============================================================================
+# INTENTIONALLY TRACKED environment files (safe defaults, no real secrets):
+# =============================================================================
+# .env.example           - Template with placeholder values
+# .env.development       - Development defaults (safe placeholder passwords)
+# .env.test              - Test environment configuration
+# .env.production.example - Production structure template
+# =============================================================================
+bun-debug.log*
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+.vscode/
+.idea/
+
+# AI Coding
+.gemini/*
+.claude/*
+.codex/*
+.specify/*

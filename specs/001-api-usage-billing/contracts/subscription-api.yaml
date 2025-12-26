@@ -1,0 +1,577 @@
+openapi: 3.1.0
+info:
+  title: Subscription API
+  description: API for subscription and tier management
+  version: 1.0.0
+  contact:
+    name: API Usage Analytics Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.{organization}.example.com/v1
+    description: Production server
+    variables:
+      organization:
+        default: demo
+        description: Organization slug
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Subscription
+    description: Customer subscription management
+  - name: Tiers
+    description: Available subscription tiers
+
+paths:
+  /subscription:
+    get:
+      operationId: getCurrentSubscription
+      summary: Get current subscription
+      description: Returns the authenticated customer's current subscription details
+      tags:
+        - Subscription
+      responses:
+        '200':
+          description: Current subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No active subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /subscription/tiers:
+    get:
+      operationId: listAvailableTiers
+      summary: List available subscription tiers
+      description: Returns all public subscription tiers for the organization
+      tags:
+        - Tiers
+      parameters:
+        - name: include_current
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Include customer's current tier even if not public
+      responses:
+        '200':
+          description: List of available tiers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TierList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscription/tiers/{id}:
+    get:
+      operationId: getTier
+      summary: Get tier details
+      description: Returns detailed information about a specific tier
+      tags:
+        - Tiers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tier details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /subscription/upgrade:
+    post:
+      operationId: upgradeSubscription
+      summary: Upgrade subscription tier
+      description: Upgrade to a higher tier with immediate effect and pro-rated billing
+      tags:
+        - Subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpgradeRequest'
+      responses:
+        '200':
+          description: Subscription upgraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionChangeResponse'
+        '400':
+          description: Cannot upgrade to selected tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          description: Payment required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequiredError'
+
+  /subscription/downgrade:
+    post:
+      operationId: downgradeSubscription
+      summary: Downgrade subscription tier
+      description: Request downgrade to a lower tier, effective at next billing period
+      tags:
+        - Subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DowngradeRequest'
+      responses:
+        '200':
+          description: Downgrade scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionChangeResponse'
+        '400':
+          description: Cannot downgrade to selected tier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscription/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Cancel subscription
+      description: Cancel subscription at end of current billing period
+      tags:
+        - Subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+      responses:
+        '200':
+          description: Cancellation scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionChangeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Subscription already cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /subscription/reactivate:
+    post:
+      operationId: reactivateSubscription
+      summary: Reactivate cancelled subscription
+      description: Reactivate a cancelled subscription before period ends
+      tags:
+        - Subscription
+      responses:
+        '200':
+          description: Subscription reactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Cannot reactivate (already expired or active)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /subscription/preview-change:
+    post:
+      operationId: previewSubscriptionChange
+      summary: Preview subscription change
+      description: Calculate pro-rated charges for a tier change without executing
+      tags:
+        - Subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tier_id
+              properties:
+                tier_id:
+                  type: string
+                  format: uuid
+                billing_cycle:
+                  type: string
+                  enum: [monthly, yearly]
+      responses:
+        '200':
+          description: Change preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePreview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Subscription:
+      type: object
+      required:
+        - id
+        - customer_id
+        - tier
+        - status
+        - billing_cycle
+        - current_period
+      properties:
+        id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        tier:
+          $ref: '#/components/schemas/Tier'
+        status:
+          type: string
+          enum: [active, paused, cancelled, expired]
+        billing_cycle:
+          type: string
+          enum: [monthly, yearly]
+        current_period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+        usage:
+          $ref: '#/components/schemas/UsageSummary'
+        pending_change:
+          $ref: '#/components/schemas/PendingChange'
+        trial_ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    Tier:
+      type: object
+      required:
+        - id
+        - name
+        - pricing
+        - quotas
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Pro
+        slug:
+          type: string
+          example: pro
+        description:
+          type: string
+          nullable: true
+        pricing:
+          $ref: '#/components/schemas/TierPricing'
+        quotas:
+          $ref: '#/components/schemas/TierQuotas'
+        rate_limits:
+          $ref: '#/components/schemas/TierRateLimits'
+        features:
+          type: object
+          additionalProperties: true
+        sla_percentage:
+          type: number
+          format: float
+          nullable: true
+          example: 99.9
+        is_current:
+          type: boolean
+          description: Whether this is the customer's current tier
+
+    TierPricing:
+      type: object
+      properties:
+        monthly:
+          $ref: '#/components/schemas/Money'
+        yearly:
+          $ref: '#/components/schemas/Money'
+        overage:
+          type: object
+          properties:
+            per_request:
+              $ref: '#/components/schemas/Money'
+            per_mb:
+              $ref: '#/components/schemas/Money'
+
+    TierQuotas:
+      type: object
+      properties:
+        requests:
+          type: integer
+          format: int64
+          nullable: true
+          description: Monthly request quota (null = unlimited)
+        bandwidth_mb:
+          type: integer
+          format: int64
+          nullable: true
+          description: Monthly bandwidth in MB (null = unlimited)
+        compute_seconds:
+          type: integer
+          format: int64
+          nullable: true
+
+    TierRateLimits:
+      type: object
+      properties:
+        per_second:
+          type: integer
+          nullable: true
+        per_minute:
+          type: integer
+          nullable: true
+        burst:
+          type: integer
+          nullable: true
+
+    TierList:
+      type: object
+      properties:
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tier'
+
+    UsageSummary:
+      type: object
+      properties:
+        requests:
+          type: object
+          properties:
+            used:
+              type: integer
+              format: int64
+            limit:
+              type: integer
+              format: int64
+              nullable: true
+            percentage:
+              type: number
+              format: float
+        bandwidth_mb:
+          type: object
+          properties:
+            used:
+              type: integer
+              format: int64
+            limit:
+              type: integer
+              format: int64
+              nullable: true
+            percentage:
+              type: number
+              format: float
+
+    PendingChange:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          enum: [upgrade, downgrade, cancel]
+        new_tier:
+          $ref: '#/components/schemas/Tier'
+        effective_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+
+    UpgradeRequest:
+      type: object
+      required:
+        - tier_id
+      properties:
+        tier_id:
+          type: string
+          format: uuid
+        billing_cycle:
+          type: string
+          enum: [monthly, yearly]
+          description: Only applicable when changing billing cycle
+
+    DowngradeRequest:
+      type: object
+      required:
+        - tier_id
+      properties:
+        tier_id:
+          type: string
+          format: uuid
+        billing_cycle:
+          type: string
+          enum: [monthly, yearly]
+
+    CancelRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Optional cancellation reason
+        feedback:
+          type: string
+          description: Optional feedback
+
+    SubscriptionChangeResponse:
+      type: object
+      properties:
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+        change_type:
+          type: string
+          enum: [immediate, scheduled]
+        effective_date:
+          type: string
+          format: date
+        proration:
+          $ref: '#/components/schemas/Proration'
+        message:
+          type: string
+
+    Proration:
+      type: object
+      nullable: true
+      properties:
+        credit:
+          $ref: '#/components/schemas/Money'
+        charge:
+          $ref: '#/components/schemas/Money'
+        net:
+          $ref: '#/components/schemas/Money'
+
+    ChangePreview:
+      type: object
+      properties:
+        current_tier:
+          $ref: '#/components/schemas/Tier'
+        new_tier:
+          $ref: '#/components/schemas/Tier'
+        change_type:
+          type: string
+          enum: [upgrade, downgrade]
+        effective:
+          type: string
+          enum: [immediate, next_period]
+        effective_date:
+          type: string
+          format: date
+        proration:
+          $ref: '#/components/schemas/Proration'
+        new_billing_amount:
+          $ref: '#/components/schemas/Money'
+
+    PaymentRequiredError:
+      type: object
+      properties:
+        error_code:
+          type: string
+          example: PAYMENT_REQUIRED
+        message:
+          type: string
+        amount_due:
+          $ref: '#/components/schemas/Money'
+        payment_url:
+          type: string
+          format: uri
+
+    Money:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          default: THB
+
+    Error:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

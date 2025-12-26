@@ -1,0 +1,27 @@
+{
+  "name": "@repo/admin",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@api-billing/api-client": "workspace:*",
+    "@api-billing/auth": "workspace:*",
+    "@api-billing/query": "workspace:*",
+    "@api-billing/ui": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "next": "14.2.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.2.25",
+    "typescript": "^5.4.5"
+  }
+}

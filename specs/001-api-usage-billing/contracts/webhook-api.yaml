@@ -1,0 +1,621 @@
+openapi: 3.1.0
+info:
+  title: Webhook API
+  description: API for managing webhook endpoints and viewing delivery history
+  version: 1.0.0
+  contact:
+    name: API Usage Analytics Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.{organization}.example.com/v1
+    description: Production server
+    variables:
+      organization:
+        default: demo
+        description: Organization slug
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Webhooks
+    description: Webhook endpoint management
+  - name: Deliveries
+    description: Webhook delivery history and retry
+
+paths:
+  /webhooks:
+    get:
+      operationId: listWebhooks
+      summary: List webhook endpoints
+      description: Returns all configured webhook endpoints
+      tags:
+        - Webhooks
+      parameters:
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of webhook endpoints
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createWebhook
+      summary: Create webhook endpoint
+      description: Creates a new webhook endpoint for receiving event notifications
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookWithSecret'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Maximum webhooks limit reached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /webhooks/{id}:
+    get:
+      operationId: getWebhook
+      summary: Get webhook details
+      description: Returns details about a specific webhook endpoint
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Webhook details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateWebhook
+      summary: Update webhook endpoint
+      description: Update webhook URL, events, or status
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookRequest'
+      responses:
+        '200':
+          description: Webhook updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteWebhook
+      summary: Delete webhook endpoint
+      description: Permanently deletes a webhook endpoint
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '204':
+          description: Webhook deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks/{id}/test:
+    post:
+      operationId: testWebhook
+      summary: Send test event
+      description: Sends a test event to verify webhook configuration
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_type:
+                  type: string
+                  enum:
+                    - test.webhook
+                    - usage.quota_warning
+                    - usage.quota_exceeded
+                    - invoice.created
+                    - invoice.paid
+                    - payment.received
+                    - subscription.upgraded
+                    - subscription.downgraded
+                    - subscription.cancelled
+                    - api_key.created
+                    - api_key.revoked
+                  default: test.webhook
+      responses:
+        '200':
+          description: Test event sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestWebhookResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks/{id}/secret:
+    post:
+      operationId: regenerateSecret
+      summary: Regenerate webhook secret
+      description: Generates a new signing secret for the webhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Secret regenerated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookWithSecret'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks/{id}/deliveries:
+    get:
+      operationId: listDeliveries
+      summary: List webhook deliveries
+      description: Returns delivery history for a webhook endpoint
+      tags:
+        - Deliveries
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, delivered, failed]
+        - name: event_type
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Delivery history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks/{id}/deliveries/{delivery_id}:
+    get:
+      operationId: getDelivery
+      summary: Get delivery details
+      description: Returns detailed information about a specific delivery attempt
+      tags:
+        - Deliveries
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+        - name: delivery_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Delivery details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks/{id}/deliveries/{delivery_id}/retry:
+    post:
+      operationId: retryDelivery
+      summary: Retry failed delivery
+      description: Manually retry a failed webhook delivery
+      tags:
+        - Deliveries
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+        - name: delivery_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Retry initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Delivery already succeeded or max retries exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /webhooks/events:
+    get:
+      operationId: listEventTypes
+      summary: List available event types
+      description: Returns all event types that can be subscribed to
+      tags:
+        - Webhooks
+      responses:
+        '200':
+          description: Available event types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTypeList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    WebhookId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Webhook endpoint ID
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+  schemas:
+    Webhook:
+      type: object
+      required:
+        - id
+        - url
+        - events
+        - is_active
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+          example: https://example.com/webhooks/usage
+        description:
+          type: string
+          nullable: true
+        events:
+          type: array
+          items:
+            type: string
+          example: [usage.quota_warning, invoice.created]
+        is_active:
+          type: boolean
+        last_triggered_at:
+          type: string
+          format: date-time
+          nullable: true
+        consecutive_failures:
+          type: integer
+          description: Number of consecutive failed deliveries
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    WebhookWithSecret:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            secret:
+              type: string
+              description: |
+                HMAC-SHA256 signing secret. **Store securely** -
+                can only be viewed when created or regenerated.
+              example: whsec_a1b2c3d4e5f6g7h8i9j0
+
+    WebhookList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateWebhookRequest:
+      type: object
+      required:
+        - url
+        - events
+      properties:
+        url:
+          type: string
+          format: uri
+          description: HTTPS endpoint URL
+        description:
+          type: string
+          maxLength: 255
+        events:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: Event types to subscribe to
+
+    UpdateWebhookRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        description:
+          type: string
+          maxLength: 255
+          nullable: true
+        events:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        is_active:
+          type: boolean
+
+    TestWebhookResponse:
+      type: object
+      properties:
+        delivery_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        status:
+          type: string
+          enum: [pending, delivered, failed]
+        response_status:
+          type: integer
+          nullable: true
+        response_time_ms:
+          type: integer
+          nullable: true
+        message:
+          type: string
+
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        endpoint_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        event_id:
+          type: string
+          format: uuid
+        payload:
+          type: object
+          description: The webhook payload that was/will be sent
+        status:
+          type: string
+          enum: [pending, delivered, failed]
+        attempts:
+          type: integer
+        max_attempts:
+          type: integer
+        response_status:
+          type: integer
+          nullable: true
+        response_body:
+          type: string
+          nullable: true
+          description: First 1000 characters of response
+        response_time_ms:
+          type: integer
+          nullable: true
+        next_retry_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        failed_at:
+          type: string
+          format: date-time
+          nullable: true
+        failure_reason:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    DeliveryList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Delivery'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    EventType:
+      type: object
+      properties:
+        name:
+          type: string
+          example: usage.quota_warning
+        description:
+          type: string
+          example: Triggered when usage reaches 80%, 95%, or 100% of quota
+        category:
+          type: string
+          example: usage
+        payload_schema:
+          type: object
+          description: JSON Schema for the event payload
+
+    EventTypeList:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+
+    WebhookPayload:
+      type: object
+      description: Standard webhook payload structure
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique event ID
+        type:
+          type: string
+          description: Event type
+        created_at:
+          type: string
+          format: date-time
+        data:
+          type: object
+          description: Event-specific data
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        has_more:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

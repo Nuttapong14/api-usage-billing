@@ -1,0 +1,370 @@
+openapi: 3.1.0
+info:
+  title: Usage API
+  description: API for tracking and querying API usage data
+  version: 1.0.0
+  contact:
+    name: API Usage Analytics Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.{organization}.example.com/v1
+    description: Production server
+    variables:
+      organization:
+        default: demo
+        description: Organization slug
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+tags:
+  - name: Usage
+    description: Usage tracking and querying endpoints
+
+paths:
+  /usage/current:
+    get:
+      operationId: getCurrentUsage
+      summary: Get current billing period usage
+      description: Returns usage statistics for the current billing period
+      tags:
+        - Usage
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyIdFilter'
+      responses:
+        '200':
+          description: Current usage data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUsage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /usage/history:
+    get:
+      operationId: getUsageHistory
+      summary: Get historical usage data
+      description: Returns aggregated usage data for a date range
+      tags:
+        - Usage
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (inclusive)
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (inclusive)
+        - $ref: '#/components/parameters/ApiKeyIdFilter'
+        - name: granularity
+          in: query
+          schema:
+            type: string
+            enum: [hourly, daily, weekly, monthly]
+            default: daily
+          description: Data aggregation granularity
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Historical usage data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageHistory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /usage/realtime:
+    get:
+      operationId: getRealtimeUsage
+      summary: Subscribe to real-time usage updates
+      description: WebSocket endpoint for live usage counter updates
+      tags:
+        - Usage
+      responses:
+        '101':
+          description: WebSocket upgrade successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /usage/breakdown:
+    get:
+      operationId: getUsageBreakdown
+      summary: Get usage breakdown by endpoint
+      description: Returns detailed breakdown of usage per API endpoint
+      tags:
+        - Usage
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/ApiKeyIdFilter'
+        - name: group_by
+          in: query
+          schema:
+            type: string
+            enum: [endpoint, method, status_code, api_key]
+            default: endpoint
+      responses:
+        '200':
+          description: Usage breakdown data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageBreakdown'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Keycloak
+
+  parameters:
+    ApiKeyIdFilter:
+      name: api_key_id
+      in: query
+      schema:
+        type: string
+        format: uuid
+      description: Filter by specific API key
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+      description: Maximum number of results
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Number of results to skip
+
+  schemas:
+    CurrentUsage:
+      type: object
+      required:
+        - customer_id
+        - billing_period
+        - usage
+        - quota
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        billing_period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+        usage:
+          $ref: '#/components/schemas/UsageMetrics'
+        quota:
+          $ref: '#/components/schemas/QuotaStatus'
+        last_updated:
+          type: string
+          format: date-time
+
+    UsageMetrics:
+      type: object
+      properties:
+        total_requests:
+          type: integer
+          format: int64
+        successful_requests:
+          type: integer
+          format: int64
+        failed_requests:
+          type: integer
+          format: int64
+        total_bandwidth_bytes:
+          type: integer
+          format: int64
+        avg_latency_ms:
+          type: number
+          format: float
+        p95_latency_ms:
+          type: number
+          format: float
+        p99_latency_ms:
+          type: number
+          format: float
+
+    QuotaStatus:
+      type: object
+      properties:
+        requests:
+          $ref: '#/components/schemas/QuotaItem'
+        bandwidth_mb:
+          $ref: '#/components/schemas/QuotaItem'
+
+    QuotaItem:
+      type: object
+      properties:
+        limit:
+          type: integer
+          format: int64
+          nullable: true
+          description: Null means unlimited
+        used:
+          type: integer
+          format: int64
+        remaining:
+          type: integer
+          format: int64
+          nullable: true
+        percentage_used:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+
+    UsageHistory:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageDataPoint'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    UsageDataPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        period:
+          type: string
+          description: Period label (e.g., "2025-01-15" for daily)
+        metrics:
+          $ref: '#/components/schemas/UsageMetrics'
+
+    UsageBreakdown:
+      type: object
+      properties:
+        total:
+          $ref: '#/components/schemas/UsageMetrics'
+        breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                description: Grouping key (endpoint, method, etc.)
+              metrics:
+                $ref: '#/components/schemas/UsageMetrics'
+              percentage:
+                type: number
+                format: float
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        has_more:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+          example: USAGE_001
+        message:
+          type: string
+          example: Invalid date range
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

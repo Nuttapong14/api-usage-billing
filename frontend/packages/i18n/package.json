@@ -1,0 +1,28 @@
+{
+  "name": "@repo/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./th": {
+      "types": "./src/locales/th.ts",
+      "default": "./src/locales/th.ts"
+    },
+    "./en": {
+      "types": "./src/locales/en.ts",
+      "default": "./src/locales/en.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

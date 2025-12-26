@@ -1,0 +1,35 @@
+# Bun configuration for API Usage Analytics & Billing Frontend
+# https://bun.sh/docs/runtime/bunfig
+
+[install]
+# Use faster lockfile format
+lockfile = "bun.lock"
+
+# Auto-install peer dependencies
+peer = true
+
+# Production mode for faster installs in CI
+# production = false
+
+[install.cache]
+# Enable global cache for faster subsequent installs
+dir = "~/.bun/install/cache"
+
+# Disable cache verification for faster installs (development)
+# disable = false
+
+[run]
+# Silent mode for cleaner output
+# silent = false
+
+# Bun shell for scripts
+bun = true
+
+[test]
+# Coverage configuration
+coverage = true
+coverageDir = "coverage"
+
+[workspace]
+# Workspace packages definition
+packages = ["apps/*", "packages/*"]

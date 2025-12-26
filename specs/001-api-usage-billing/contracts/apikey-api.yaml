@@ -1,0 +1,570 @@
+openapi: 3.1.0
+info:
+  title: API Key Management API
+  description: API for managing API keys with secure rotation and revocation
+  version: 1.0.0
+  contact:
+    name: API Usage Analytics Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.{organization}.example.com/v1
+    description: Production server
+    variables:
+      organization:
+        default: demo
+        description: Organization slug
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: API Keys
+    description: API key lifecycle management
+
+paths:
+  /api-keys:
+    get:
+      operationId: listApiKeys
+      summary: List all API keys
+      description: Returns all API keys for the authenticated customer
+      tags:
+        - API Keys
+      parameters:
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+          description: Filter by active status
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createApiKey
+      summary: Create a new API key
+      description: |
+        Creates a new API key. **IMPORTANT**: The full key is only returned once
+        in this response. Store it securely - it cannot be retrieved again.
+      tags:
+        - API Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateApiKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Maximum API keys limit reached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api-keys/{id}:
+    get:
+      operationId: getApiKey
+      summary: Get API key details
+      description: Returns details about a specific API key (without the key value)
+      tags:
+        - API Keys
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyId'
+      responses:
+        '200':
+          description: API key details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateApiKey
+      summary: Update API key settings
+      description: Update API key name, permissions, or restrictions
+      tags:
+        - API Keys
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyRequest'
+      responses:
+        '200':
+          description: API key updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: revokeApiKey
+      summary: Revoke API key
+      description: |
+        Immediately revokes an API key. This action takes effect within 1 second
+        globally. The key cannot be restored after revocation.
+      tags:
+        - API Keys
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Optional revocation reason for audit
+      responses:
+        '200':
+          description: API key revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  revoked_at:
+                    type: string
+                    format: date-time
+                  message:
+                    type: string
+                    example: API key revoked successfully. Changes take effect within 1 second.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: API key already revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api-keys/{id}/rotate:
+    post:
+      operationId: rotateApiKey
+      summary: Rotate API key
+      description: |
+        Creates a new key and schedules the old key for expiration after the
+        grace period (default 24 hours). Both keys are valid during the grace period.
+      tags:
+        - API Keys
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grace_period_hours:
+                  type: integer
+                  minimum: 1
+                  maximum: 168
+                  default: 24
+                  description: Hours to keep old key valid (1-168)
+      responses:
+        '200':
+          description: Key rotated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RotateApiKeyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Key already in rotation grace period
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api-keys/{id}/usage:
+    get:
+      operationId: getApiKeyUsage
+      summary: Get usage for specific API key
+      description: Returns usage statistics for a specific API key
+      tags:
+        - API Keys
+      parameters:
+        - $ref: '#/components/parameters/ApiKeyId'
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: API key usage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyUsage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ApiKeyId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: API key ID
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+  schemas:
+    ApiKey:
+      type: object
+      required:
+        - id
+        - key_prefix
+        - name
+        - permissions
+        - is_active
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        key_prefix:
+          type: string
+          example: apik_live_a1
+          description: First 12 characters of the key for identification
+        name:
+          type: string
+          example: Production API Key
+        description:
+          type: string
+          nullable: true
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [read, write, admin]
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Specific API endpoint scopes
+        ip_whitelist:
+          type: array
+          items:
+            type: string
+          description: Allowed IP addresses/CIDR ranges
+          nullable: true
+        allowed_origins:
+          type: array
+          items:
+            type: string
+          description: Allowed CORS origins
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_used_ip:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        is_rotating:
+          type: boolean
+          description: Whether key is in rotation grace period
+        rotation_grace_until:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    ApiKeyList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreateApiKeyRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Production API Key
+        description:
+          type: string
+          maxLength: 500
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [read, write, admin]
+          default: [read]
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Specific API endpoint scopes (empty = all)
+        ip_whitelist:
+          type: array
+          items:
+            type: string
+          description: Allowed IP addresses/CIDR ranges
+        allowed_origins:
+          type: array
+          items:
+            type: string
+          description: Allowed CORS origins
+        expires_at:
+          type: string
+          format: date-time
+          description: Optional expiration date
+
+    CreateApiKeyResponse:
+      type: object
+      required:
+        - key
+        - api_key
+      properties:
+        key:
+          type: string
+          description: |
+            The full API key. **STORE THIS SECURELY** - it will never be shown again.
+          example: apik_example_a1b2c3d4e5f6g7h8i9j0k1l2
+        api_key:
+          $ref: '#/components/schemas/ApiKey'
+        warning:
+          type: string
+          example: This is the only time the full key will be displayed. Store it securely.
+
+    UpdateApiKeyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [read, write, admin]
+        scopes:
+          type: array
+          items:
+            type: string
+        ip_whitelist:
+          type: array
+          items:
+            type: string
+          nullable: true
+        allowed_origins:
+          type: array
+          items:
+            type: string
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    RotateApiKeyResponse:
+      type: object
+      required:
+        - new_key
+        - new_api_key
+        - old_key_expires_at
+      properties:
+        new_key:
+          type: string
+          description: The new API key. Store this securely.
+          example: apik_example_x9y8z7w6v5u4t3s2r1q0p9o8
+        new_api_key:
+          $ref: '#/components/schemas/ApiKey'
+        old_key_id:
+          type: string
+          format: uuid
+        old_key_expires_at:
+          type: string
+          format: date-time
+          description: When the old key will stop working
+        message:
+          type: string
+          example: New key created. Old key remains valid until expiration.
+
+    ApiKeyUsage:
+      type: object
+      properties:
+        api_key_id:
+          type: string
+          format: uuid
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+        total_requests:
+          type: integer
+          format: int64
+        successful_requests:
+          type: integer
+          format: int64
+        failed_requests:
+          type: integer
+          format: int64
+        total_bandwidth_bytes:
+          type: integer
+          format: int64
+        avg_latency_ms:
+          type: number
+          format: float
+        top_endpoints:
+          type: array
+          items:
+            type: object
+            properties:
+              endpoint:
+                type: string
+              count:
+                type: integer
+                format: int64
+              percentage:
+                type: number
+                format: float
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        has_more:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

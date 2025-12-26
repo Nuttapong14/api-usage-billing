@@ -1,0 +1,31 @@
+_format_version: "3.0"
+
+services:
+  - name: usage-service
+    url: http://usage-service.default.svc.cluster.local:8081
+    routes:
+      - name: usage-routes
+        paths:
+          - /v1/usage
+        strip_path: false
+
+  - name: subscription-service
+    url: http://subscription-service.default.svc.cluster.local:8083
+    routes:
+      - name: subscription-routes
+        paths:
+          - /v1/subscription
+        strip_path: false
+
+  - name: billing-service
+    url: http://billing-service.default.svc.cluster.local:8082
+    routes:
+      - name: billing-routes
+        paths:
+          - /v1/invoices
+          - /v1/payments
+        strip_path: false
+
+plugins:
+  - name: key-auth
+    enabled: true

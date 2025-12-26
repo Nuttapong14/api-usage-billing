@@ -1,0 +1,14 @@
+_format_version: "3.0"
+
+services:
+  - name: usage-service
+    url: http://host.docker.internal:8081
+    routes:
+      - name: usage-routes
+        paths:
+          - /v1/usage
+        strip_path: false
+
+plugins:
+  - name: key-auth
+    enabled: true

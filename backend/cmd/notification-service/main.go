@@ -1,0 +1,102 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
+	"github.com/your-org/api-usage-billing/backend/internal/api"
+	"github.com/your-org/api-usage-billing/backend/internal/config"
+	webhookhandler "github.com/your-org/api-usage-billing/backend/internal/handler/webhook"
+	"github.com/your-org/api-usage-billing/backend/internal/pkg/email"
+	"github.com/your-org/api-usage-billing/backend/internal/pkg/logger"
+	"github.com/your-org/api-usage-billing/backend/internal/repository"
+	notificationsvc "github.com/your-org/api-usage-billing/backend/internal/service/notification"
+)
+
+func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to load config")
+	}
+
+	appLogger := logger.New("info", cfg.Environment != "production")
+	log.Logger = appLogger
+
+	db, err := connectDatabase(cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to connect database")
+	}
+
+	webhookRepo := repository.NewWebhookRepository(db)
+	dispatcher := notificationsvc.NewHTTPDispatcher(nil)
+
+	var sender email.Sender
+	if cfg.SMTP.Host != "" && cfg.SMTP.From != "" {
+		smtpSender, err := email.NewSMTPSender(email.SMTPConfig{
+			Host:     cfg.SMTP.Host,
+			Port:     cfg.SMTP.Port,
+			Username: cfg.SMTP.Username,
+			Password: cfg.SMTP.Password,
+			From:     cfg.SMTP.From,
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("failed to configure SMTP sender")
+		} else {
+			sender = smtpSender
+		}
+	}
+	if sender == nil {
+		sender = email.NewNoopSender()
+	}
+
+	service := notificationsvc.NewService(webhookRepo, dispatcher, sender)
+
+	serverConfig := api.DefaultServerConfig()
+	serverConfig.Port = cfg.Port
+	serverConfig.Environment = cfg.Environment
+	serverConfig.AppName = "notification-service"
+
+	server := api.NewServer(serverConfig)
+	server.RegisterHealthCheck()
+
+	handler := webhookhandler.NewHandler(service)
+	RegisterRoutes(server.App(), handler)
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := server.Start(); err != nil {
+			log.Fatal().Err(err).Msg("server stopped")
+		}
+	}()
+
+	<-shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Error().Err(err).Msg("failed to shutdown server")
+	}
+}
+
+func connectDatabase(cfg *config.Config) (*gorm.DB, error) {
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=UTC",
+		cfg.Database.Host,
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Name,
+		cfg.Database.Port,
+		cfg.Database.SSLMode,
+	)
+
+	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
+}

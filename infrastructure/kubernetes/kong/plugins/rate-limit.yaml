@@ -1,0 +1,17 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limit
+  annotations:
+    kubernetes.io/ingress.class: kong
+plugin: rate-limiting
+config:
+  policy: redis
+  redis_host: redis.default.svc.cluster.local
+  redis_port: 6379
+  redis_password: ""
+  limit_by: header
+  header_name: X-Customer-ID
+  second: 100
+  minute: 6000
+  fault_tolerant: true

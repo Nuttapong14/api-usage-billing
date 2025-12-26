@@ -1,0 +1,634 @@
+openapi: 3.1.0
+info:
+  title: Billing API
+  description: API for invoices, payments, and billing operations
+  version: 1.0.0
+  contact:
+    name: API Usage Analytics Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.{organization}.example.com/v1
+    description: Production server
+    variables:
+      organization:
+        default: demo
+        description: Organization slug
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Invoices
+    description: Invoice management
+  - name: Payments
+    description: Payment processing
+  - name: CreditNotes
+    description: Credit and debit notes
+
+paths:
+  /invoices:
+    get:
+      operationId: listInvoices
+      summary: List all invoices
+      description: Returns paginated list of invoices for the authenticated customer
+      tags:
+        - Invoices
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, pending, paid, overdue, cancelled]
+          description: Filter by invoice status
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter by issue date (from)
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter by issue date (to)
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/SortBy'
+      responses:
+        '200':
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /invoices/{id}:
+    get:
+      operationId: getInvoice
+      summary: Get invoice details
+      description: Returns detailed information about a specific invoice
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+      responses:
+        '200':
+          description: Invoice details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /invoices/{id}/pdf:
+    get:
+      operationId: downloadInvoicePdf
+      summary: Download invoice PDF
+      description: Returns the invoice as a PDF document
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+        - name: language
+          in: query
+          schema:
+            type: string
+            enum: [th, en]
+            default: th
+          description: PDF language
+      responses:
+        '200':
+          description: PDF document
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '202':
+          description: PDF generation in progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  retry_after:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /invoices/{id}/pay:
+    post:
+      operationId: payInvoice
+      summary: Pay invoice
+      description: Initiate payment for an invoice
+      tags:
+        - Invoices
+        - Payments
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Invoice already paid or cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payments:
+    get:
+      operationId: listPayments
+      summary: List payment history
+      description: Returns paginated list of payments
+      tags:
+        - Payments
+      parameters:
+        - name: invoice_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by invoice
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, completed, failed, refunded]
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/{id}:
+    get:
+      operationId: getPayment
+      summary: Get payment details
+      description: Returns detailed information about a specific payment
+      tags:
+        - Payments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /credit-notes:
+    get:
+      operationId: listCreditNotes
+      summary: List credit/debit notes
+      description: Returns paginated list of credit and debit notes
+      tags:
+        - CreditNotes
+      parameters:
+        - name: invoice_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [credit, debit]
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: List of credit notes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditNoteList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /credit-notes/{id}:
+    get:
+      operationId: getCreditNote
+      summary: Get credit note details
+      tags:
+        - CreditNotes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Credit note details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditNote'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Keycloak
+
+  parameters:
+    InvoiceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Invoice ID
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    SortBy:
+      name: sort_by
+      in: query
+      schema:
+        type: string
+        enum: [issue_date, due_date, total, status]
+        default: issue_date
+
+  schemas:
+    Invoice:
+      type: object
+      required:
+        - id
+        - invoice_number
+        - customer_id
+        - billing_period
+        - amounts
+        - status
+        - dates
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+          example: INV-2025-0001
+        customer_id:
+          type: string
+          format: uuid
+        subscription_id:
+          type: string
+          format: uuid
+        billing_period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date
+            end:
+              type: string
+              format: date
+        amounts:
+          $ref: '#/components/schemas/InvoiceAmounts'
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        status:
+          type: string
+          enum: [draft, pending, paid, overdue, cancelled, refunded]
+        dates:
+          type: object
+          properties:
+            issue_date:
+              type: string
+              format: date
+            due_date:
+              type: string
+              format: date
+            paid_at:
+              type: string
+              format: date-time
+              nullable: true
+        pdf_url:
+          type: string
+          format: uri
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    InvoiceAmounts:
+      type: object
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/Money'
+        discount:
+          $ref: '#/components/schemas/Money'
+        tax_rate:
+          type: number
+          format: float
+          example: 0.07
+        tax_amount:
+          $ref: '#/components/schemas/Money'
+        total:
+          $ref: '#/components/schemas/Money'
+
+    LineItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [subscription, overage, discount, adjustment]
+        description:
+          type: string
+        quantity:
+          type: number
+        unit_price:
+          $ref: '#/components/schemas/Money'
+        amount:
+          $ref: '#/components/schemas/Money'
+
+    Money:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          default: THB
+
+    InvoiceList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceSummary'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    InvoiceSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+        total:
+          $ref: '#/components/schemas/Money'
+        status:
+          type: string
+        issue_date:
+          type: string
+          format: date
+        due_date:
+          type: string
+          format: date
+        pdf_url:
+          type: string
+          format: uri
+          nullable: true
+
+    PaymentRequest:
+      type: object
+      required:
+        - payment_method
+      properties:
+        payment_method:
+          type: string
+          enum: [credit_card, bank_transfer, promptpay]
+        return_url:
+          type: string
+          format: uri
+          description: URL to redirect after payment
+        payment_source:
+          type: object
+          description: Payment source details (varies by method)
+          properties:
+            token:
+              type: string
+              description: Payment token from gateway
+
+    PaymentResponse:
+      type: object
+      properties:
+        payment_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, requires_action, completed]
+        redirect_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL for 3DS or bank redirect
+        qr_code:
+          type: string
+          description: Base64 encoded QR code for PromptPay
+          nullable: true
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_id:
+          type: string
+          format: uuid
+        amount:
+          $ref: '#/components/schemas/Money'
+        payment_method:
+          type: string
+        payment_gateway:
+          type: string
+        gateway_transaction_id:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    PaymentList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreditNote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        credit_note_number:
+          type: string
+        invoice_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [credit, debit]
+        amounts:
+          type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/Money'
+            tax_amount:
+              $ref: '#/components/schemas/Money'
+            total:
+              $ref: '#/components/schemas/Money'
+        reason:
+          type: string
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        status:
+          type: string
+          enum: [issued, applied, cancelled]
+        pdf_url:
+          type: string
+          format: uri
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    CreditNoteList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditNote'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        has_more:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

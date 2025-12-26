@@ -1,0 +1,16 @@
+ใบแจ้งหนี้ {{.InvoiceNumber}}
+ลูกค้า: {{.CustomerID}}
+สถานะ: {{.Status}}
+รอบบิล: {{.BillingPeriodStart}} - {{.BillingPeriodEnd}}
+วันที่ออกใบแจ้งหนี้: {{.IssueDate}}
+ครบกำหนดชำระ: {{.DueDate}}
+
+รายการ:
+{{- range .LineItems}}
+- {{.Description}} ({{printf "%.0f" .Quantity}} x {{printf "%.2f" .UnitPrice.Amount}} {{.UnitPrice.Currency}}): {{printf "%.2f" .Amount.Amount}} {{.Amount.Currency}}
+{{- end}}
+
+ยอดรวมก่อนภาษี: {{printf "%.2f" .Amounts.Subtotal.Amount}} {{.Amounts.Subtotal.Currency}}
+ส่วนลด: {{printf "%.2f" .Amounts.Discount.Amount}} {{.Amounts.Discount.Currency}}
+ภาษีมูลค่าเพิ่ม ({{printf "%.2f" .Amounts.TaxRate}}): {{printf "%.2f" .Amounts.TaxAmount.Amount}} {{.Amounts.TaxAmount.Currency}}
+ยอดรวมสุทธิ: {{printf "%.2f" .Amounts.Total.Amount}} {{.Amounts.Total.Currency}}
