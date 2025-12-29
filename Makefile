@@ -29,13 +29,13 @@ check-env:
 	dev test lint build clean clean-all pre-push
 
 infra-up:
-	cd infrastructure/docker && docker compose -f docker-compose.dev.yml up -d
+	cd infrastructure/docker && docker compose --env-file ../../.env -f docker-compose.dev.yml up -d
 
 infra-down:
-	cd infrastructure/docker && docker compose -f docker-compose.dev.yml down -v
+	cd infrastructure/docker && docker compose --env-file ../../.env -f docker-compose.dev.yml down -v
 
 infra-logs:
-	cd infrastructure/docker && docker compose -f docker-compose.dev.yml logs -f
+	cd infrastructure/docker && docker compose --env-file ../../.env -f docker-compose.dev.yml logs -f
 
 infra-wait:
 	@echo "Waiting for infrastructure services to be healthy..."
